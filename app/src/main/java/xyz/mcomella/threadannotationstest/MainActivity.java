@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
+/**
+ * No annotation tests to see here! Move along!
+ */
 public class MainActivity extends Activity {
 
     @Override
