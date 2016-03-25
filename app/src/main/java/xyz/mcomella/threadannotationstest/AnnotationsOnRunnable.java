@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class AnnotationsOnRunnable {
     @WorkerThread
     void onWorkerThread() {}
@@ -14,8 +17,7 @@ public class AnnotationsOnRunnable {
         void run();
     }
 
-    // TODO: test putting onto handler threads & such
-    void testRunnableAnnotations(Activity activity) {
+    void testUiThreadRunnableAnnotations(Activity activity) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -24,13 +26,35 @@ public class AnnotationsOnRunnable {
             }
         });
 
-        activity.runOnUiThread(new UiThreadRunnable() {
+        activity.runOnUiThread(new Runnable() {
+            @UiThread // Redundant to `runOnUiThread`
             @Override
             public void run() {
-                // But we can annotate our own interface to
-                // get the inference I'd expect.
+                // We can explicitly annotate.
                 onWorkerThread(); // correct: displays warning.
             }
         });
+
+        activity.runOnUiThread(new UiThreadRunnable() { // `UiThreadRunnable` redundant
+            @Override                                   //  to`run `runOnUiThread`
+            public void run() {
+                // Or use a type that contains the annotation.
+                onWorkerThread(); // correct: displays warning.
+            }
+        });
+    }
+
+    @UiThread
+    void onUiThread() {}
+
+    void testWorkerThreadRunnableAnnotations() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                // Similarly, a worker thread is not inferred.
+                onUiThread(); // UNEXPECTED: no warning.
+            }
+        })
     }
 }

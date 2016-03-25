@@ -8,9 +8,6 @@ public class AnnotationsOnMethods {
     @UiThread
     void onUiThread() {}
 
-    @WorkerThread
-    void onWorkerThread() {}
-
     void unannotatedCallsUiThread() {
         onUiThread();
     }
@@ -21,7 +18,12 @@ public class AnnotationsOnMethods {
         onUiThread(); // correct: displays warning.
 
         // UNEXPECTED: the following method does not display a warning.
-        // I expect it to because it calls to a @UiThread annotated method.
+        // I expect it to because it calls a @UiThread annotated method.
+        //
+        // We can explicitly annotate this method too, but this method
+        // should only be on the UiThread because it calls a method
+        // annotated for the UiThread and thus the annotation would be
+        // redundant.
         unannotatedCallsUiThread();
     }
 }
